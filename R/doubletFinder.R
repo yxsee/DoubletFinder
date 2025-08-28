@@ -86,7 +86,14 @@ doubletFinder <- function(seu,
     print(paste("Creating",n_doublets,"artificial doublets...",sep=" "))
     real.cells1 <- sample(real.cells, n_doublets, replace = TRUE)
     real.cells2 <- sample(real.cells, n_doublets, replace = TRUE)
-    doublets <- (data[, real.cells1] + data[, real.cells2])/2
+    if(inherits(data,what = "IterableMatrix")){
+      doublets <- ((as(data[, unique(real.cells1)],"dgCMatrix")[,real.cells1] +
+                 as(data[, unique(real.cells2)],"dgCMatrix")[,real.cells2])/2) |>
+                as("IterableMatrix") |>
+                write_matrix_dir(tempfile())
+		} else {
+      doublets <- (data[, real.cells1] + data[, real.cells2])/2
+      }
     colnames(doublets) <- paste("X", 1:n_doublets, sep = "")
     data_wdoublets <- cbind(data, doublets)
     # Keep track of the types of the simulated doublets
